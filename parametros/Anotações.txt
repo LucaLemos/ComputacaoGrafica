@@ -1,0 +1,227 @@
+ponto c = foco da camera
+hx e hy determina retangulo de vista
+d = a distancia focal determina a distancia do foco para a tela
+U V N sao vetores da base ortonormal que determinam o sistema de coordenadas de vista
+
+===sistemas de coordenadas===
+-Coordenadas mundias
+coordenada do usuario 
+utiliza regra da mão direita
+-Coordenas de vista
+coordenadas da Camera
+utiliza regra da mão esquerda
+
+
+Para mudar do sistema mundial para o de vista:
+1) pegar o ponto P e subtrair do C ou seja do foco da camera
+v = P - C
+2) Fazer a mudança do sistema de coordenadas ou seja obter as cooredenadas do vetor v na base alfa(base do sistema de vista) para isso
+pegar o vetor v e multiplicar pela matriz de mudança de base do sistema mundial para o de vista.
+Para obter a matriz de mudança de base,  
+vista -> mundial
+| Ux Vx Nz |
+| Uy Vy Ny |
+| Uz Vz Nz |
+mundial -> vista
+| Ux Uy Uz |
+| Vx Vy Vz |
+| Nx Ny Nz |
+
+Ortogonalizar o V
+usando os vetores V' e N e a partir dele obter o vetor UpdateCamera
+Processo de Gram-Schimidt
+o novo V' vai se V menos a projeção ortogonal de V em N
+
+V' = V - ( [V,N]/[N,N] ) N
+
+U = N * V' 
+
+=====================EXEMPLO=====================
+C = (1, 1, 2)
+N = (-1, -1, -1)
+V = (0, 0, 1)
+d = 1
+hx = 1
+hy = 1
+
+P = 1 -3 -5   -forma mundial-
+
+1) -Ortogonalizar o V-
+V' = V - ( [V,N]/[N,N] ) N
+V' = (0, 0, 1) - ( [(0, 0, 1),(-1, -1, -1)]/[(-1, -1, -1),(-1, -1, -1)] ) * (-1, -1, -1)
+V' = (0, 0, 1) - ( (0, 0, -1)/(1, 1, 1) ) * (-1, -1, -1)
+V' = (0, 0, 1) - (-1)/3 * (-1, -1, -1)
+V' = (0, 0, 3/3) - (1/3, 1/3, 1/3)
+V' = ( -(1/3), -(1/3), 2/3 )
+V' = (-1, -1, 2 ) * 1/3
+V' = (-1/3, -1/3, 2/3 )
+
+2) -Calcular o U-
+U = N * V' 
+U = | i  j  k |
+    |-1 -1 -1 |
+    |-1 -1  2 |
+
+     -1     2
+U = | i  j  k |
+  N |-1 -1 -1 |
+  V |-1 -1  2 |
+      i     k
+
+U = ( (-1 * j * -1) + (i * -1 * 2) + (-1 * -1 * k) ) - ( (2 * j * -1) + (k * -1 * -1) + (-1 * -1 * i) )
+U = ( j + -2i + k) - (-2j + k + i)
+U = -3i + 3j + 0 * (1/3)
+U = (-1, 1, 0)
+
+3)-----Normalizar U V N-----
+U = (-1, 1, 0)
+||U|| = √ (-1)^2 + 1^2 + 0^2
+||U|| = √2
+U_ = 1/√2 * (-1, 1, 0)
+U_ = 1/√2 * (-√2/2, √2/2, 0)
+
+V' = (-1, -1, 2 ) * 1/3
+||V'|| = √ -1^2 + -1^2 + 2^2
+||V'|| = √6 
+v'_ = 1/√6  * (-1, -1, 2 ) * 1/3
+v'_ = 1/√6  * (-√6/6, -√6/6, √6/3)
+
+N = (-1, -1, -1)
+||N|| = √ (-1)^2 + (-1)^2 + (-1)^2
+||N|| = √3
+N_ = 1/√3 * (-1, -1, -1)
+N_ = 1/√3 * (-√3/3, -√3/3, -√3/3)
+
+----matriz de mudança de base mundial -> vista --------------
+|-√2/2  √2/2  0   |
+|-√6/6 -√6/6  √6/3|
+|-√3/3 -√3/3 -√3/3|
+
+-----subtrair o foco C do ponto P-------
+P - C
+(1, -3, -5) - (1, 1, 2)
+P' = (0, -4, -7)
+
+-----------ponto no sistema de vista-----------
+|-√2/2  √2/2  0   |   | 0|
+|-√6/6 -√6/6  √6/3| * |-4|
+|-√3/3 -√3/3 -√3/3|   |-7|
+
+|-√2/2*0 +  √2/2*-4 +  0*-7   |
+|-√6/6*0 + -√6/6*-4 +  √6/3*-7|
+|-√3/3*0 + -√3/3*-4 + -√3/3*-7|
+
+| -2√2  |
+|-5√6/3|
+|11√3/3|
+
+P' = (-2√2, -5√6/3, 11√3/3) -forma de vista-
+P' = (-2.82842712475, -4.08248290464, 6.35085296109) -forma de vista-
+----------------------------------------------------------------------------------------
+
+
+P(Xm, Ym, Zm)(coordenadas mundial) --transforma-> P'(Xv, Yv, Zv)(coordenadas de vista)  --projeta em perspectiva-> P_=(Xs, Ys)
+-projeção em perspectiva-
+Xs = d * Xv/Zv
+Xs = 1 * -2.82842712475/6.35085296109
+Xs = -0,4453617714154345
+
+Ys = d * Yv/Zv
+Ys = 1 * -4.08248290464/6.35085296109
+Ys = -0,642824346533024
+
+-cordenadas normalizadas-
+Xs_ = Xs/hx = d/hx * Xv/Zv
+Xs_ = Xs/hx
+Xs_ = -0,4453617714154345/1
+Xs_ = -0,4453617714154345
+
+Ys_ = Ys/hy = d/hx * Yv/Zv
+Ys_ = Ys/hy
+Ys_ = -0,642824346533024/1
+Ys_ = -0,642824346533024
+
+-coordenadas de tela=
+Ptela = (i, j)
+TamanhoX
+TamanhoY
+
+i = arredondar (  ( (Xs_ + 1)/2 ) * TamanhoX + 0,5  )
+Xs_ = -0,4453617714154345
+i = 222
+
+j = arredondar (  TamnhoY - ( (Ys_ + 1)/2) * TamanhoY + 0,5  )
+Ys_ = -0,642824346533024
+j = 369
+
+
+-----------------------------------------------RASTERIZAÇAO---------------------------------
+dados 3 pontos
+
+P1 (X0, Y0)
+P2 (X1, Y1)
+P3 (X2, Y2)
+1) ordenar os pontos pelo ponto y mais alto
+
+Xmin coordenada da interceção do lado esquerdo do triangulo
+Xmax coordenada da interceção do lado direito do triangulo
+Yscan e o Y atual da varredura
+
+o proxima linha sera chamada Xmin_ e Xmax_ e o Y sera Yscan + 1
+
+todos os pixels entre (Xmin, Yscan) e (Xmax, Yscan) devem ser pintados
+
+--Y = aX + b--
+{Y0 = a * X0 + b
+{Y1 = a * X1 + b
+
+(declive) a = (Y1 - Y0)/(X1 - X0)   <--
+
+-a partir do valor do declive-
+
+{yscan = a * Xmin + b
+{yscan + 1 = a * xmin_ + b
+
+1 = a(Xmin_ - Xmin)
+Xmin_ - Xmin = 1/a
+
+Xmin_ = 1/a + Xmin  <--
+Xmax_ = 1/a + Xmax  <--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
