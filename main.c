@@ -55,11 +55,6 @@ int main(void) {
 
         BeginDrawing();
 
-            carregaMalha(arquivo, obj);
-            carregaCamera(camera);
-            coordenadaTela(obj, camera);
-
-
             ClearBackground(BLACK);
             desenha(obj);
 
