@@ -1,6 +1,6 @@
 Projeto da cadeira de Computação grafica da UFRPE.
 
----------------------------------Especificações--------------------------------------------------------------------
+---------------------------------Especificações 1 entrega--------------------------------------------------------------------
 Universidade Federal Rural de Pernambuco (UFRPE)
 Departamento de Computação (DC)
 Computação Gráfica Básica (06230)
@@ -62,5 +62,41 @@ Obs.: caso desejado, é permitido usar uma biblioteca externa que ofereça a fun
 um pixel colorido na tela.
 -----------------------------------------------------------------------------------------------------
 
+---------------------------------Especificações 2 entrega--------------------------------------------------------------------
+Universidade Federal Rural de Pernambuco (UFRPE)
+Departamento de Computação (DC)
+Computação Gráfica Básica (06230)
+2a VA - Especificação
 
+Alterar o programa da 1a VA para renderizar um objeto 3D utilizando os modelos de
+tonalização e iluminação de Phong.
+A aplicação deverá carregar a partir de um arquivo de texto os seguintes parâmetros da
+câmera virtual e de iluminação:
+• Ponto C;
+• Vetores N e V;
+• Escalares d, hx e hy;
+• Cores RGB Iamb e Il;
+• Escalares Ka, Ks e η;
+• Vetores Kd e Od;
+• Ponto Pl.
 
+Exemplo de parâmetros de iluminação:
+Iamb = 100 100 100
+Ka = 0.2
+Il = 127 213 254
+Pl = 60 5 -10
+Kd = 0.5 0.3 0.2
+Od = 0.7 0.5 0.8
+Ks = 0.5
+η = 1
+O usuário deve ser capaz de alterar os valores dos parâmetros no arquivo de texto,
+recarregá-los e redesenhar o objeto sem precisar fechar a aplicação e abri-la novamente
+(ex: o usuário pode pressionar uma tecla específica para recarregar os parâmetros a partir
+do arquivo de texto e redesenhar o objeto).
+Deve-se utilizar o algoritmo de visibilidade z-buffer e o algoritmo de rasterização de
+polígonos scan line conversion (varredura).
+Qualquer linguagem de programação pode ser utilizada (C, Java, etc.). A única função
+gráfica que pode ser utilizada é a que desenha um pixel colorido na tela. Apenas as
+bibliotecas padrão da linguagem escolhida podem ser usadas.
+Obs.: caso desejado, é permitido usar uma biblioteca externa que ofereça a função de pintar
+um pixel colorido na tela.

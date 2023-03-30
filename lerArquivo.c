@@ -114,7 +114,7 @@ void carregaMalha(int arquivo, float teste[3][3][10000]) {
     fclose(fp);
 }
 
-void carregaCamera(float teste[3][6]) {
+void carregaCamera(float teste[3][14]) {
     int contador = 0;
     float dados[10];
 

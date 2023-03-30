@@ -16,6 +16,7 @@
 		"string.h": "c",
 		"dirent.h": "c",
 		"string": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"cmath": "c"
 	}
 }

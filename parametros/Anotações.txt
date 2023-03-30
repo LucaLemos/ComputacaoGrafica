@@ -188,16 +188,97 @@ Xmin_ - Xmin = 1/a
 Xmin_ = 1/a + Xmin  <--
 Xmax_ = 1/a + Xmax  <--
 
+---------------------------------------------Valores de Iluminação--------------------------------------------------------------
+Iamb = cor da luz ambiental da cena
+Il = cor da luz
+
+Ka = coeficiente de reflexão ambiental
+Ks = coeficiente de reflexão especular do objeto
+n = modela o tamanho do destaque especular
+
+Kd = coeficiente de reflexão difusa do objeto
+Od = cor difusa da superficie objeto
+
+Pl = ponto de luz
+-------------------------------------------Iluminação------------------------------------
+
+Ia = Ka * Iamb
+Id = <N,L> * Kd * Od * Il
+produto escalar
+
+------------------------Iluminação de Phong-------------------------------------------------
+Is = componente especular
+Is = <R,v>^n * Ks * Il
+
+R: direção normalizada de reflexão
+v: direção normalizada de vista (não é o V da camera)
+
+I = Ia + Id + Is
+
+-como calcular o vetor R
+R = projLN + (-1) * (L - projLN)
+projLN = (<L,N>/<N,N>)*N
+||N|| = 1 -> <N,N> = 1 -> projLN = <N,L>N
+R = <N,L>N + (-1) * (L - <N,L>N) 
+R = 2<N,L>N - L
+
+--------------------------------------Casos especiais-------------------------------
+<N,L> < 0 {
+  <V,N> < 0 {
+    N = -N
+  }else {
+    desonsidera a luz Id + Is
+  }
+}
+
+<V,R> < 0
+desconsiderar o componente especular
+
+------------------------------------------Tonalização Phong----------------------------------
+Encontrar o P original 
+P_ = aP_1 + bP_2 + cP_3 onde a + b + c = 1
+P ~ aP1 + bP2 + cP3
+
+----------------------------Passo a Passo video----------------------------
+1) calcular a normal de caade triangulo
+utilizando os vértices v1, v2 e v3 calcular o produto vetorial entre v2-v1 e v3-v1 (regra da mão esquerda) e normalizar o resuldado
+<v1x, v1y, v1z> <v2x, v2y, v2z> <v3x, v1y, v3z>
+<v2x-v1x, v2y-v1y, v2z-v1z> * <v3x-v1x, v3y-v1y, v3z-v1z>
+<Rx, Ry, Rz>
+
+//calcular o U = N * Vortogonal
+        float U[3];
+        U[0] = (N[1]*Vortogonal[2]) - (N[2]*Vortogonal[1]);
+        U[1] = (Vortogonal[0]*N[2]) - (Vortogonal[2]*N[0]);
+        U[2] = (N[0]*Vortogonal[1]) - (N[1]*Vortogonal[0]);
+        //printf("U: %f %f %f\n", U[0], U[1], U[2]);
+
+//normalizar o U V N para U_ V_ N_
+        float U_[3];
+        float _U_ = sqrt( pow(U[0], 2) + pow(U[1], 2) + pow(U[2], 2) );
+        U_[0] = (1/_U_) * U[0];
+        U_[1] = (1/_U_) * U[1];
+        U_[2] = (1/_U_) * U[2];
 
 
+2) calcular a normal de cade vertice
+Somar a normal de cade triangulo que possue aquele vertice depois normalizar o resultado
+com isso teremos a normal de cade vertice normalizada
 
+3)preparar o zbuffer
+(opcional) organizar os triangulos pelo baricentro
 
-
-
-
-
-
-
+4) Para cada triangulo 
+4.1 projetar o vertices
+4.2 No scanline para cada ponto na lista de pixel de um segmento do scanline 
+encontrar o P original(coordenada de vista) e utilizar a aproximação a partir da coordenada baricentrica
+4.3 Fazer a consulta com o zbuffer se z < atual então calcula a cor se nao descarta
+4.4 Encontrar o N normal de P normalizar N
+4.5 Encontrar o V(a coordenada do ponto 3d negativada) e normalizar V
+4.6 Encontrar L = Pl - P e normalizar L
+4.7 Encontrar o R (ja estara normalizado)
+4.8 Verificar casos especiais
+4.9 Calcular a cor
 
 
 
