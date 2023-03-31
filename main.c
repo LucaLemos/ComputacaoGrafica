@@ -8,7 +8,9 @@ const int linhaDiv = 15;
 
 void ordena(float pontoCima[2], float pontoMedio[2], float pontoBaixo[2]);
 void pOriginal(int V[3], float P_[2], float P_1[2], float P_2[2], float P_3[2], float pontoOriginal[2][3]);
-void zerarBuffer(int zbuffer[800][450]);
+void zerarBuffer();
+void zerarPhong();
+void valoresPhong(float teste[3][3][10000]);
 void coordenadaTela(float parametros[3][3][10000], float camera[3][14]);
 void rasterizar(int V[3], float P1x, float P1y, float P2x, float P2y, float P3x, float P3y);
 void desenhaLinha(int V[3], float P_1[2], float P_2[2], float P_3[2], float P1x, float P1y, float P2x, float P2y);
@@ -21,14 +23,14 @@ int zbuffer[800][450];
 
 int main(void) {
     InitWindow(screenWidth, screenHeight, "Projeto Computação Gráfica");
-
     
-    int arquivo = 9;
+    int arquivo = 10;
 
     carregaMalha(arquivo, obj);
     carregaCamera(camera);
     zerarBuffer(zbuffer);
     coordenadaTela(obj, camera);
+    valoresPhong(obj);
 
     int numVertices = obj[0][0][0];
     float vertices[3][10000]; 
@@ -47,30 +49,39 @@ int main(void) {
             if (arquivo < 10) {
                 arquivo++;
                 carregaMalha(arquivo, obj);
+                carregaCamera(camera);
                 zerarBuffer(zbuffer);
+                zerarPhong();
                 coordenadaTela(obj, camera);
+                valoresPhong(obj);
             }
         }
         if (IsKeyPressed('A')) {
             if (arquivo > 3) {
                 arquivo--;
                 carregaMalha(arquivo, obj);
-                zerarBuffer(zbuffer);
+                carregaCamera(camera);
+                zerarBuffer();
+                zerarPhong();
                 coordenadaTela(obj, camera);
+                valoresPhong(obj);
             }
         }
         if (IsKeyPressed('R')) {
             carregaMalha(arquivo, obj);
             carregaCamera(camera);
-            zerarBuffer(zbuffer);
+            zerarBuffer();
+            zerarPhong();
             coordenadaTela(obj, camera);
+            valoresPhong(obj);
         }
 
         BeginDrawing();  
 
             ClearBackground(BLACK);
+
             desenha(obj);
-            zerarBuffer(zbuffer);
+            zerarBuffer();
 
             DrawText("Aperte a ou d para navegar entre arquivos"  , 5, 2, 5, LIGHTGRAY);
             DrawText("Aperte r para aplicar a visão da camera"  , 5, 12, 5, LIGHTGRAY);
@@ -98,57 +109,16 @@ void desenha(float teste[3][3][10000]) {
         triangulos[1][i] = teste[2][1][i];
         triangulos[2][i] = teste[2][2][i];
     }
-
-    for(int i = 0; i < numTriangulos; i++) {
-        int ver1 = triangulos[0][i] - 1;
-        int ver2 = triangulos[1][i] - 1;
-        int ver3 = triangulos[2][i] - 1;
-
-        float vet1[3] = {Phong[0][0][ver2] - Phong[0][0][ver1], Phong[0][1][ver2] - Phong[0][1][ver1], Phong[0][2][ver2] - Phong[0][2][ver1]};
-        float vet2[3] = {Phong[0][0][ver3] - Phong[0][0][ver1], Phong[0][1][ver3] - Phong[0][1][ver1], Phong[0][2][ver3] - Phong[0][2][ver1]};
-
-        //calcular a normal = vetor1 * vetor2
-        float normal[3];
-        normal[0] = (vet1[1]*vet2[2]) - (vet1[2]*vet2[1]);
-        normal[1] = (vet2[0]*vet1[2]) - (vet2[2]*vet1[0]);
-        normal[2] = (vet1[0]*vet2[1]) - (vet1[1]*vet2[0]);
-    
-        //normalizar
-        float _normal_ = sqrt( pow(normal[0], 2) + pow(normal[1], 2) + pow(normal[2], 2) );
-        Phong[1][0][i] = (1/_normal_) * normal[0];
-        Phong[1][1][i] = (1/_normal_) * normal[1];
-        Phong[1][2][i] = (1/_normal_) * normal[2];
-    }
-
-    for (int i = 0; i < numVertices; i++) {
-        for(int y = 0; y < numTriangulos; y++) {
-            if(triangulos[0][y] == i + 1 || triangulos[1][y] == i + 1 || triangulos[2][y] == i + 1) {
-                Phong[2][0][i] = Phong[1][0][y] + Phong[2][0][i];
-                Phong[2][1][i] = Phong[1][1][y] + Phong[2][1][i];
-                Phong[2][2][i] = Phong[1][2][y] + Phong[2][2][i];
-            }
-        }
-
-        //normalizar
-        float _normal_ = sqrt( pow(Phong[2][0][i], 2) + pow(Phong[2][1][i], 2) + pow(Phong[2][2][i], 2) );
-        Phong[2][0][i] = (1/_normal_) * Phong[2][0][i];
-        Phong[2][1][i] = (1/_normal_) * Phong[2][1][i];
-        Phong[2][2][i] = (1/_normal_) * Phong[2][2][i];
-    }
     
     for (int i = 0; i < numTriangulos; i++) {
         // -1 pois armazena o valor na lista onde se encontra o vertice correspondentes
         int ver1 = triangulos[0][i] - 1;
         int ver2 = triangulos[1][i] - 1;
         int ver3 = triangulos[2][i] - 1;
-
+        
         int V[3] = {ver1, ver2, ver3};
         rasterizar(V, vertices[0][ver1], vertices[1][ver1], vertices[0][ver2], vertices[1][ver2], vertices[0][ver3], vertices[1][ver3]);
     }
-
-    //for (int i = 0; i < numVertices; i++) {
-        //DrawPixel(vertices[i].x, vertices[i].y, GREEN);
-    //}
 }
 
 void desenhaLinha(int V[3], float P_1[2], float P_2[2], float P_3[2], float P1x, float P1y, float P2x, float P2y) {
@@ -301,7 +271,15 @@ void desenhaLinha(int V[3], float P_1[2], float P_2[2], float P_3[2], float P1x,
             //I = Ia + Id + Is
             float I[3] = {Ia[0] + Id[0] + Is[0], Ia[1] + Id[1] + Is[0], Ia[2] + Id[2] + Is[0]};
             printf("\nI: %f %f %f\n\n", I[0], I[1], I[2]);
-
+            if(I[0] > 255) {
+                I[0] = 255;
+            }
+            if(I[1] > 255) {
+                I[1] = 255;
+            }
+            if(I[2] > 255) {
+                I[2] = 255;
+            }
 
             DrawPixel(auxP1x, auxP1y, (Color){I[0], I[1], I[2], 255});
         }
@@ -550,7 +528,66 @@ void coordenadaTela(float parametros[3][3][10000], float camera[3][14]) {
     }
 }
 
-void zerarBuffer(int zbuffer[800][450]) {
+void valoresPhong(float teste[3][3][10000]) {
+    int numVertices = teste[0][0][0];
+
+    int numTriangulos = teste[0][1][0];
+    float triangulos[3][10000]; 
+    for (int i = 0; i < numTriangulos; i++) {
+        triangulos[0][i] = teste[2][0][i];
+        triangulos[1][i] = teste[2][1][i];
+        triangulos[2][i] = teste[2][2][i];
+    }
+
+    for(int i = 0; i < numTriangulos; i++) {
+        int ver1 = triangulos[0][i] - 1;
+        int ver2 = triangulos[1][i] - 1;
+        int ver3 = triangulos[2][i] - 1;
+
+        float vet1[3] = {Phong[0][0][ver2] - Phong[0][0][ver1], Phong[0][1][ver2] - Phong[0][1][ver1], Phong[0][2][ver2] - Phong[0][2][ver1]};
+        float vet2[3] = {Phong[0][0][ver3] - Phong[0][0][ver1], Phong[0][1][ver3] - Phong[0][1][ver1], Phong[0][2][ver3] - Phong[0][2][ver1]};
+
+        //calcular a normal = vetor1 * vetor2
+        float normal[3];
+        normal[0] = (vet1[1]*vet2[2]) - (vet1[2]*vet2[1]);
+        normal[1] = (vet2[0]*vet1[2]) - (vet2[2]*vet1[0]);
+        normal[2] = (vet1[0]*vet2[1]) - (vet1[1]*vet2[0]);
+    
+        //normalizar
+        float _normal_ = sqrt( pow(normal[0], 2) + pow(normal[1], 2) + pow(normal[2], 2) );
+        Phong[1][0][i] = (1/_normal_) * normal[0];
+        Phong[1][1][i] = (1/_normal_) * normal[1];
+        Phong[1][2][i] = (1/_normal_) * normal[2];
+    }
+
+    for (int i = 0; i < numVertices; i++) {
+        for(int y = 0; y < numTriangulos; y++) {
+            if(triangulos[0][y] == i + 1 || triangulos[1][y] == i + 1 || triangulos[2][y] == i + 1) {
+                Phong[2][0][i] = Phong[1][0][y] + Phong[2][0][i];
+                Phong[2][1][i] = Phong[1][1][y] + Phong[2][1][i];
+                Phong[2][2][i] = Phong[1][2][y] + Phong[2][2][i];
+            }
+        }
+
+        //normalizar
+        float _normal_ = sqrt( pow(Phong[2][0][i], 2) + pow(Phong[2][1][i], 2) + pow(Phong[2][2][i], 2) );
+        Phong[2][0][i] = (1/_normal_) * Phong[2][0][i];
+        Phong[2][1][i] = (1/_normal_) * Phong[2][1][i];
+        Phong[2][2][i] = (1/_normal_) * Phong[2][2][i];
+    }
+}
+
+void zerarPhong() {
+    for(int i = 0; i < 3; i++) {
+        for(int f = 0; f < 3; f++) {
+            for(int l = 0; l < 10000; l++) {
+                Phong[i][f][l] = 0;
+            }
+        }
+    }
+}
+
+void zerarBuffer() {
     for(int i = 0; i < 800; i++) {
         for(int f = 0; f < 450; f++) {
             zbuffer[i][f] = 999999;
